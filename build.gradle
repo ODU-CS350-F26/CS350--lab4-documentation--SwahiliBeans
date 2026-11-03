@@ -17,6 +17,7 @@ java {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.0'
 }
 
 tasks.withType(Test) {
@@ -31,3 +32,40 @@ application { //Allows  ./gradlew run --args=path-to-test-data
     mainClass = 'edu.odu.cs.MostCommonWords'
 }
 
+def reportDirectory = layout.buildDirectory.dir('reports')
+
+tasks.register('copyHtml', Copy) {
+    dependsOn tasks.named('build')
+    from 'src/main/html'
+    into reportDirectory
+}
+
+tasks.register('copyDocs', Copy) {
+    dependsOn tasks.named('build'), tasks.named('javadoc')
+    from layout.buildDirectory.dir('docs')
+    into reportDirectory
+}
+
+tasks.register('reports') {
+    dependsOn tasks.named('build'), tasks.named('javadoc')
+    dependsOn tasks.named('copyHtml'), tasks.named('copyDocs')
+}
+
+gitPublish {
+    // Publish to the gh-pages branch of this project's origin repository.
+    repoUri = 'https://github.com/ODU-CS350-F26/CS350--lab4-documentation--SwahiliBeans.git'
+    branch = 'gh-pages'
+    contents {
+        from(reportDirectory)
+    }
+}
+
+// Make sure reports are assembled before the plugin copies them into its
+// publication checkout.
+tasks.named('gitPublishCopy') {
+    dependsOn tasks.named('reports')
+}
+
+tasks.register('deployReports') {
+    dependsOn tasks.named('gitPublishPush')
+}

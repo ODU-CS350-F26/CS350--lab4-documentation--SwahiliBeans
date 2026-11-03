@@ -9,7 +9,7 @@ all the words contained in those works, and count how often each word is seen.
 In this project, we present a program intended to count the occurrences of
 English words in a collection of plain-text documents.
 
-## Input
+## Input 
 
 The program is intended to be run from the command line like this:
 
